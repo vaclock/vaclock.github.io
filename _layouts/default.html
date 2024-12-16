@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html class="page-default" lang="zh-Hans">
+  <head>
+    <meta charset="utf-8">
+    <title>{%if page.title%}{{page.title}} | {%endif%}{{site.title}}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="{{ page.tags | default: site.keywords | join: ',' }}">
+    <meta name="author" content="Jun Yang (harttle)">
+    <meta name="description" content="{{page.excerpt | default: site.description | strip_html | strip_newlines | truncate: 128}}">
+    <meta name="theme-color" content="#5ABA59">
+    {% feed_meta %}
+    <!-- <link rel="shortcut icon" href="/favicon.ico"> -->
+    <!-- <link rel="apple-touch-icon" href="/assets/img/favicon-512x512.png"> -->
+    <!-- <link rel="manifest" href="/manifest.json"> -->
+    <link rel="stylesheet" href="/assets/css/site.css">
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//utteranc.es">
+    <link rel="dns-prefetch" href="//www.google-analytics.com">
+    <link rel="dns-prefetch" href="//www.google.com">
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-LVFHDCY718"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LVFHDCY718');
+    </script> -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HRRRM5LLEF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-HRRRM5LLEF');
+    </script>
+  </head>
+  <body>
+    <header class="container darken">
+      <nav>
+        <a href="/archive.html">归档</a>
+        <a href="/about.html">关于</a>
+      </nav>
+    </header>
+    {{ content }}
+    <footer class="darken">
+      <div class="container ellipsis">
+        Powered by <a href="https://jekyllrb.com/" rel="noopener" target="_blank">Jekyll</a>
+        and proudly hosted by <a href="https://github.com/harttle/harttle.github.io" rel="noopener" target="_blank">Github</a>,
+        licensed under <a rel="noopener" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0</a>.
+      </div>
+      <a href="#" id="btnScrolltop">⯅</a>
+      <script>
+      window.addEventListener('scroll', function () {
+        window.pageYOffset > 300
+          ? btnScrolltop.setAttribute('class', 'show')
+          : btnScrolltop.removeAttribute('class');
+      });
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            console.log('ServiceWorker registration successful with scope: ', reg.scope);
+          }).catch(function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+      </script>
+      <!-- Google tag (gtag.js) -->
+    </footer>
+  </body>

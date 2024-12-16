@@ -1,0 +1,120 @@
+@import 'mixins';
+@import 'variables';
+
+html, body {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  font-family: sans-serif;
+}
+html {
+  /* same with footer/header for smooth bounce animation */
+  background: var(--darken-bg-color);
+  color: var(--primary-color);
+  font-size: 16px;
+}
+body {
+  background: var(--bg-color);
+}
+
+@media (max-width: 767px) {
+  .hidden-xs {
+    display: none !important;
+  }
+}
+
+.pull-right {
+  float: right;
+}
+.hidden {
+  display: none;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+a:hover, a:active, a:focus {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.darken {
+  color: var(--darken-secondary-color);
+  background: var(--darken-bg-color);
+  a {
+    @include link-hover(var(--darken-primary-color), var(--link-color));
+    text-decoration: none;
+  }
+}
+.btn-hover {
+  @include link-hover(var(--link-color), white);
+  padding: 0.3em 1em;
+  transition: background ease-out .4s;
+}
+.btn-hover:hover {
+  background: var(--link-color);
+  text-decoration: none;
+}
+
+.container {
+  padding: 0 80px;
+}
+.clearfix:after {
+  content: ' ';
+  display: table;
+  clear: both;
+}
+@include media-lg {
+  .container {
+    padding: 0 48px;
+  }
+}
+@include media-md {
+  .container {
+    padding: 0 32px;
+  }
+}
+@include media-xs {
+  .container {
+    padding: 0 16px;
+  }
+}
+
+.list-unstyled{
+  padding-left: 0px;
+  list-style: none;
+  margin: 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.tag {
+  color: $green;
+  padding: 0em 0.4em;
+  font-size: 0.9em; 
+  line-height: 1.4em;
+  border: 1px solid $green;
+  border-radius: 8px;
+  display: inline-block;
+}
+a.tag {
+  text-decoration: underline;
+  transition: background ease-out .4s;
+}
+a.tag:hover {
+  background: $green;
+  color: white;
+  text-decoration: none;
+}
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

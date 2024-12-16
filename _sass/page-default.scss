@@ -1,0 +1,42 @@
+.page-default {
+  header {
+    height: 64px;
+    line-height: 64px;
+    font-size: 0;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1000;
+    overflow: hidden;
+    .logo {
+      display: inline-block;
+      svg {
+        height: 32px;
+        vertical-align: middle;
+        .h {
+          fill: $green;
+        }
+        .rest {
+          fill: currentColor;
+          font: normal 350px sans-serif;
+        }
+      }
+    }
+    nav {
+      float: right;
+      height: 64px;
+    }
+    nav a {
+      margin-left: 1rem;
+      font-size: 16px;
+      @include media-xs {
+        margin-left: 0.5rem;
+      }
+    }
+  }
+
+  footer {
+    height: 64px;
+    line-height: 64px;
+    text-align: center;
+  }
+}

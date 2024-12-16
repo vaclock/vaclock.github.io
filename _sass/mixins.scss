@@ -1,0 +1,61 @@
+@mixin size($value){ 
+  width: $value;
+  height: $value;
+}
+@mixin opacity($value){
+  opacity: $value;
+  -webkit-opacity: $value;
+  -moz-opacity: $value;
+  -o-opacity: $value;
+  -ms-opacity: $value;
+}
+@mixin animation($v...){
+  animation: $v; 
+  -webkit-animation: $v; 
+  -moz-animation: $v; 
+  -o-animation: $v; 
+  -ms-animation: $v; 
+}
+
+@mixin link-hover($normal, $hover) {
+  color: $normal;
+  &:hover, &:active {
+    color: $hover;
+  }
+}
+
+@mixin keyframes($animationName) {
+  @-webkit-keyframes #{$animationName} {
+    @content;
+  }
+  @-moz-keyframes #{$animationName} {
+    @content;
+  }
+  @-o-keyframes #{$animationName} {
+    @content;
+  }
+  @keyframes #{$animationName} {
+    @content;
+  }
+}
+
+@mixin media-xs {
+  @media(max-width: 768px){
+    @content;
+  }
+}
+@mixin media-sm {
+  @media(max-width: 992px){
+    @content;
+  }
+}
+@mixin media-md {
+  @media(max-width: 1200px){
+    @content;
+  }
+}
+@mixin media-lg {
+  @media(max-width: 1600px){
+    @content;
+  }
+}

@@ -1,0 +1,40 @@
+.page-archive {
+  margin-bottom: 64px;
+  h1 {
+    font-size: 24px;
+    margin: 32px 0;
+  }
+  h2 {
+    font-size: 1rem;
+    margin-top: 40px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--separator-color);
+  }
+
+  h2 .year {
+    float: right;
+    color: var(--secondary-color);
+    font-family: cursive;
+    font-size: 1.5rem;
+    font-style: italic;
+  }
+
+  li {
+    line-height: 2rem;
+    time {
+      width: 120px;
+      float: left;
+    }
+    div {
+      margin-left: 160px;
+    }
+    .title {
+      margin-right: 16px;
+    }
+    @include media-xs{
+      div{
+        margin-left: 0;
+      }
+    }
+  }
+}

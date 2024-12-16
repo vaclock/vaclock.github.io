@@ -1,0 +1,117 @@
+$top-blank: 70px;
+$spliter-top-offset: 70px;
+$timeline-left-width: 95px;
+
+.page-index {
+  display: flex;
+  justify-content: space-between;
+  .content {
+    flex: 75%;
+    flex-grow: 3;
+    padding-right: 64px;
+    article {
+      margin-top: 48px;
+      h2 {
+        margin: 0;
+        a{
+          @include link-hover(var(--primary-color), var(--link-color));
+          font-weight: normal;
+        }
+      }
+      .meta {
+        margin: 12px 0 16px;
+      }
+      time {
+        float: right;
+        color: var(--primary-color);
+        font-size: 0.9em; 
+      }
+      .more {
+        text-align: right;
+      }
+    }
+    .pager {
+      margin: 15px 0 50px 0px;
+      display: flex;
+      a{
+        flex: 1;
+        border: 1px solid #4D85D1;
+        text-align: center;
+      }
+      a:nth-child(2){
+        border-left: none;
+      }
+    }
+  }
+  aside {
+    flex: 25%;
+    flex-grow: 1;
+    min-width: 180px;
+    padding-top: 48px;
+    h4 {
+      overflow: hidden;
+      font-size: 18px;
+      padding-bottom: 4px;
+      margin: 0 0 8px;
+      border-bottom: 1px solid var(--separator-color);
+    }
+    section.follow {
+      .social-share {
+        padding-left:0;
+      }
+      .social-share li {
+        display:inline-block;
+        margin-right:5px;
+        vertical-align: top;
+      }
+      .social-share li a {
+        /* hardcode as white, for svg internal padding */
+        background: white;
+        transition:transform .4s;
+        height:36px;
+        width:36px;
+        display: block;
+        overflow: hidden;
+        border-radius:18px;
+      }
+      .social-share li a:hover {
+        transform:rotate(360deg);
+      }
+    }
+    section.collection-list, section.recent-list {
+      margin-top: 48px;
+      li {
+        line-height: 32px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        a {
+          @include link-hover(var(--secondary-color), var(--link-color));
+        }
+      } 
+    }
+  }
+
+  @include media-md {
+    .content {
+      padding-right: 48px;
+    }
+  }
+  @include media-sm {
+    aside section.follow .social-share li:last-child {
+      display: none;
+    }
+    .content {
+      padding-right: 32px;
+    }
+  }
+  @include media-xs {
+    display: block;
+    > .content {
+      padding-right: 0;
+    }
+    > aside, .meta .tag {
+      display: none;
+    }
+  }
+}

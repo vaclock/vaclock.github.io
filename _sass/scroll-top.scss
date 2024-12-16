@@ -1,0 +1,20 @@
+#btnScrolltop {
+  position: fixed;
+  right: 50px;
+  bottom: 65px;
+  @include size(40px);
+  font-size: 32px;
+  visibility: hidden;
+  color: #333;
+  @include opacity(0);
+}
+#btnScrolltop.show{
+  visibility: visible;
+  @include opacity(0.3);
+}
+#btnScrolltop:hover{
+  @include opacity(1);
+}
+#btnScrolltop:hover, #btnScrolltop:focus, #btnScrolltop:active {
+  text-decoration: none;
+}
