@@ -1,0 +1,8 @@
+{
+  "short_name": "Vaclock",
+  "name": "Vaclock",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#5ABA59",
+  "background_color": "#5ABA59"
+}

@@ -1,0 +1,76 @@
+---
+layout: default
+---
+
+<div class="container page-index">
+  <div class="content">
+    <div class="posts">
+      {% for post in paginator.posts %}
+      <article>
+        <h2 class="ellipsis"><a href="{{post.url}}">{{ post.title }}</a> </h2>
+        <p class="meta clearfix">
+          {% for tag in post.tags %}{%include tag.html%}{% endfor %}
+          <time>{{post.date | date: '%m/%d %Y'}}</time>
+        </p>
+        <div class="md excerpt">{{ post.excerpt }}</div>
+        <div class="more"><a class="btn-hover" href="{{ post.url}}">继续阅读 ➤</a></div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <p class="pager">
+      {% if paginator.previous_page %}
+      <a class="btn-hover" href="{{paginator.previous_page_path}}">上一页</a>
+      {% endif %}
+      {% if paginator.next_page %}
+      <a class="btn-hover pager-next-url" href="{{paginator.next_page_path}}">下一页</a>
+      {% endif %}
+    </p>
+    {% include latex.html %}
+  </div>
+  <aside>
+    <section class="author-block">
+      <img src="/assets/img/avatar.jpg" alt="avatar">
+      <h2>Vaclock</h2>
+      <p class="ellipsis">Web 工程师</p>
+    </section>
+    <section class="follow">
+      <ul class="social-share">
+        <li class="social-share-item">
+          <a href="https://github.com/vaclock">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"><path d="M0 0v24h24v-24h-24zm14.534 19.59c-.406.078-.534-.171-.534-.384v-2.195c0-.747-.262-1.233-.55-1.481 1.782-.198 3.654-.875 3.654-3.947 0-.874-.311-1.588-.824-2.147.083-.202.357-1.016-.079-2.117 0 0-.671-.215-2.198.82-.639-.18-1.323-.267-2.003-.271-.68.003-1.364.091-2.003.269-1.528-1.035-2.2-.82-2.2-.82-.434 1.102-.16 1.915-.077 2.118-.512.56-.824 1.273-.824 2.147 0 3.064 1.867 3.751 3.645 3.954-.229.2-.436.552-.508 1.07-.457.204-1.614.557-2.328-.666 0 0-.423-.768-1.227-.825 0 0-.78-.01-.055.487 0 0 .525.246.889 1.17 0 0 .463 1.428 2.688.944v1.489c0 .211-.129.459-.528.385-3.18-1.057-5.472-4.056-5.472-7.59 0-4.419 3.582-8 8-8s8 3.581 8 8c0 3.533-2.289 6.531-5.466 7.59z"></path></svg>
+          </a>
+        </li>
+        <!-- <li class="social-share-item">
+          <a href="https://twitter.com/harttleharttle" style="background: rgb(51, 204, 255);" fill="white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="white" style="transform: scale(0.44) translate(1px, 2px);"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828
+            46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+          </a>
+        </li> -->
+      </ul>
+    </section>
+    <section class="collection-list">
+      <h4>系列</h4>
+      <ul class="list-unstyled">
+        {% for item in site.series %}
+          {% assign tag = item[0] %}
+        <li>
+          <span class="pull-right">{{site.tags[tag] | size}}</span>
+          <a href="{{item[1].path}}">{{item[1].title}}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    <section class="recent-list">
+      <h4>最新</h4>
+      <ul class="list-unstyled">
+        {% for post in site.posts limit: 16 %}
+        <li>
+          <a href="{{post.url}}" title="{{post.title | escape}}">{{post.title}}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </aside>
+</div>
+

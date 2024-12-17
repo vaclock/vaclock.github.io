@@ -10,9 +10,9 @@
     <meta name="description" content="{{page.excerpt | default: site.description | strip_html | strip_newlines | truncate: 128}}">
     <meta name="theme-color" content="#5ABA59">
     {% feed_meta %}
-    <!-- <link rel="shortcut icon" href="/favicon.ico"> -->
+    <link rel="shortcut icon" href="/assets/img/favicon.jpg">
     <!-- <link rel="apple-touch-icon" href="/assets/img/favicon-512x512.png"> -->
-    <!-- <link rel="manifest" href="/manifest.json"> -->
+    <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/assets/css/site.css">
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="//utteranc.es">
@@ -36,6 +36,7 @@
   </head>
   <body>
     <header class="container darken">
+      <a class="logo" href="/" aria-label="vaclock">{% include logo.html %}</a>
       <nav>
         <a href="/archive.html">归档</a>
         <a href="/about.html">关于</a>
