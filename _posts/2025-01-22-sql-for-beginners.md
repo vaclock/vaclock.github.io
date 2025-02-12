@@ -1,6 +1,9 @@
-# 数据库
+---
+title: 数据库
+tags: 数据库 SQL
+---
 
-[toc]
+# 数据库
 
 ## 类型介绍
 
@@ -15,6 +18,7 @@ Name: Alice, Bob, Eve
 Age:  30, 25, 28
 City: London, New York, Paris
 ```
+<!--more-->
 
 ## sql语句
 
