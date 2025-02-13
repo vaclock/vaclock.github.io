@@ -84,7 +84,9 @@ DROP TABLE `study-sql`.`student`
 
 [查询语句](https://dev.mysql.com/doc/refman/8.0/en/built-in-function-reference.html)
 
-- 条件查询
+[练习](https://leetcode.cn/problemset/database/)
+
+- 条件查询: `where`一般用于过滤原始数据, `having`一般用于过滤分组后的数据
 
 ```sql
 select name as 姓名, age as 年龄 from student when age >= 10 and age <= 30;
@@ -127,7 +129,7 @@ select * from student order by age desc, id asc;
 select class as 班级, count(*) as 人数 from student group by class order by 人数;
 ```
 
-- 函数: `AVG`, `COUNT`, `SUM`...
+- 聚合函数: `AVG`, `COUNT`, `SUM`...
 
 ```sql
 select class as 班级, AVG(score) as 平均分 from student group by class order by 平均分 desc;
@@ -140,7 +142,11 @@ select class as 班级, AVG(score) as 平均分 from student group by class orde
 select distinct class from student;
 
 -- 聚合
-select class as '班级', avg(score) as '平均分', count(*) as '人数', sum(score) as '班级总分', min(score) as '最低分', max(score) as '最高分' from student_new group by class order by '最高分';
+select class as '班级', avg(score) as '平均分', count(*) as '人数', sum(score) as '班级总分', min(score) as '最低分', max(score) as '最高分'
+  from student
+  group by class
+  order by '最高分';
+  having score >= 60
 ```
 
 - 字符串函数: `concat`, `substr`, `length`, `upper`, `lower`, mysql的下标从1开始, `substr('一二三', 2, 3)`的结果是 二三
@@ -149,7 +155,7 @@ select class as '班级', avg(score) as '平均分', count(*) as '人数', sum(s
 
 - 日期函数: `year`, `month`, `day`, `time`
 
-- 条件函数: `if`
+- 条件函数: `if` `exists` `not exists`
 
 ```sql
 select name, if(score >=60, '及格', '不及格') from student;
@@ -164,6 +170,48 @@ select name, if(score >=60, '及格', '不及格') from student;
 select date_format('2024-01-21', '%Y年%m月%d日');
 -- 2024-01-12
 select str_to_date('2024年01月12日', '%Y年%m月%d日')
+```
+
+- 子查询: `where`后放入查询语句
+
+```sql
+select name, class from student where score=(select max(score) from student);
+```
+
+- join查询: `join on`
+
+`join on`默认就是`inner join on`: 只返回两个表中能关联上的数据
+
+`left join on`: 额外返回左表中没有关联上的数据 (比如`user`没有对应的`card`, 比`join on`多的数据是左表`user`中的内容)
+
+`right join on`: 额外返回右表中没有关联上的数据 (比如`card`没有`user_id`, 比`join on`多的数据是右表`id_card`中的内容)
+
+在`from`后的是左表, `join` 后的是右表。
+
+假设有两张表`user`, `id_card`, 其中`id_card.user_id` = `user.id`
+
+字段
+
+`user`: `id name`
+
+`id_card`: `id card_name user_id`
+
+```sql
+select * from user join id_card on user.id = id_card.user_id;
+
+-- 结果简化
+select user.id, name, id_card.id as card_id, id_card.card_name as card_name
+  from user
+  inner join id_card on user.id = id_card.user_id;
+```
+
+条件查询: 查询出出所有有员工存在的部门
+
+```sql
+select name from department
+  where exists (
+   select * from employee where department.id = employee.department_id
+  )
 ```
 
 ## mysql
@@ -213,5 +261,37 @@ select str_to_date('2024年01月12日', '%Y年%m月%d日')
 ## redis
 
 ## 数据库设计
+
+### 联表
+
+- 外键: 上述`dql`中联合查询部分里, `id_card`的`user_id`字段就是外键，与`user`表的`id`字段相关联
+
+1. 关联更新方式
+   1. 当`user`中的数据删除时, 对应的`id_card`可以设置删除模式, 默认是`RESTICT`, 意味着, 只有`id_card`中外键没有值指向该`user.id`时, 才允许当前user删除
+   2. `CASCADE`: 主表记录修改, 对应关联的从表数据也修改, 主表记录删除, 从表关联的数据也删除
+   3. `SET NULL`: 主表主键`user.id`的记录删除, 从表关联的外键`id_card.user_id`置为`null`
+   4. `NO ACTION`: `mysql`中同`RESTRICT`
+2. 一对一、一对多:
+
+3. 多对多: 文章与标签
+
+字段
+
+`article`: `id title content`
+
+`tag`: `id name`
+
+`article_tag`: `article_id tag_id` 将`article_id`与`article.id`关联 `tag_id`与`tag.id`关联, 更新方式设置为`CASCADE`
+
+查询 `tag_id`为1的所有文章
+
+```sql
+select * from article
+  join article_tag
+  on article.id = article_tag.article_id
+  join tag
+  on article_tag.tag_id = tag.id
+  where tag_id=1;
+```
 
 ## 最佳实践
