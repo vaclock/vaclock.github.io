@@ -19,7 +19,7 @@
 # in the templates via {{ site.myvariable }}.
 
 title: vaclock
-email: lee.ownclock@gmail.come
+email: lee.ownclock@gmail.com
 description: 关于学习Web、数据结构与算法、C++的笔记
 url: "https://vaclock.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 githubUrl: "https://github.com/vaclock"
