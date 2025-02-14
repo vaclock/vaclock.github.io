@@ -256,6 +256,52 @@ select name from department
 
 ### 基本操作
 
+- 事务和隔离
+
+事务：开启事务后，不直接修改表内数据，`sql`语句产生的数据修改可以进行`rollback`。
+
+开始事务: `start transaction`
+
+保存变更: `savepoint alias_action`;
+
+提交变更: `commit`, 提交后无法回滚
+
+回滚变更: `rollback to savepoint alias_action`
+
+```sql
+-- 开始事务
+start transaction;
+
+-- 保存事务开始状态
+savepoint start_action;
+
+-- 修改订单详情表中订单id为3的所有商品数量为1
+update order_items set quantity=1 where order_id=3;
+
+-- 保存上一条语句变更
+savepoint update_quantity_action;
+
+update orders set total_amount=200 where id=3
+
+-- 保存上一条语句变更
+savepoint update_orders_action;
+
+-- 回滚到更新orders之前
+rollback to savepoint update_quantity_action
+
+-- 此时orders表并未被修改
+```
+
+隔离: 在事务中, 更新了表的数据，但是没有`commit`, 这个时候查询表格得到的数据，是根据事务隔离级别的设置情况来看，是否能查到未`commit`的数据
+
+`read uncommitted`: 可以读到别的事务未提交的数据, 这会导致不可重复读(对同一数据第一次读与第二次读数据不一致，有可能在其他事务中修改了该数据), 脏读(第二次无法读取到第一次读到的数据， 有可能被`rollback`了)，也存在幻读(对同一数据的两次读取，数据记录行数不一样，其他事务可能进行了删除和插入操作)
+
+`read committed`: 可以读到别的事务已经提交的数据，这样就没有脏读问题了，但是还是存在不可重复读，与幻读
+
+`repeatable read`: 可以读取到一句提交的数据，不存在不可重复读(存在锁定机制，其他事务不能修改当前事务正在读取的数据)，但存在幻读
+
+`serializable read`: 不允许事务并行执行，解决了幻读、不可重复读、脏读
+
 ### 数据查询语句
 
 ## mongoDB
