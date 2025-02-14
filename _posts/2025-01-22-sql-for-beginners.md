@@ -214,6 +214,8 @@ select name from department
   )
 ```
 
+- **注意点**
+
 ## mysql
 
 ### mysql名词
