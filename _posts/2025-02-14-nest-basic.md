@@ -65,7 +65,7 @@ class Controller {
   constructor(private service: Service) {}
 
   execute() {
-    return this.service.findById('1')
+    return this.service.findById(1)
   }
 }
 
@@ -88,7 +88,7 @@ class IocContainer {
 
 // 使用IOC容器管理依赖
 // controller -> service -> repository
-const container = new IoCContainer()
+const container = new IocContainer()
 container.register('repository', [], Repository)
 container.register('service', ['repository'], Service)
 container.register('controller', ['service'], Controller)
@@ -99,6 +99,8 @@ container.resolve('controller').execute()
 ```
 
 ### **DI**
+
+### **装饰器**
 
 ## 专有名词解释
 
@@ -111,3 +113,19 @@ container.resolve('controller').execute()
 3. form-urlencoded: 数据放到了body中, 请求方需要encoded, 并且指定`content-type` 为 `application/x-www-form-urlencoded`, 格式为`key=value&key2=value2`
 4. form-data: 数据在body中, 请求方不需要encoded, 并且指定`content-type`为`multipart/form-data` 每个数据之前通过`--------xxxxx`分割
 5. json: 数据在body中, 请求方指定`content-type`为`application/json`, 格式为`{"key": "value"}`
+
+## 代码实操
+
+### Nest CLI
+
+### 内置模块
+
+<!-- 如FileInterceptor -->
+
+### 动态模块
+
+### 数据库连接
+
+### 上传与分片
+
+### 日志
