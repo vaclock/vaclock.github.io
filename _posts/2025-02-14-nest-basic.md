@@ -38,10 +38,12 @@ AOP（面向切面编程）是一种用于分离关注点的编程思想。在We
 
 ### **IOC**
 
+> 高层模块不应该依赖低层模块，二者都应该依赖抽象，抽象不应该依赖细节，细节应该依赖抽象。
+
 IOC（控制反转）是一种设计思想。在后端开发中，我们有多个模块，如处理路由请求的`Controller`，处理业务逻辑的`Service`，以及执行数据库操作的`Repository`等，每个模块都有明确的职责，并且它们之间通常是相互依赖的。如果直接在`Controller`中通过`new`实例化`Service`，就会导致模块之间耦合度过高，这不仅使得代码的维护变得困难，也让测试变得复杂。为了避免这种紧密耦合，我们需要一个工具来管理模块之间的依赖，这就是**IOC容器**的作用。Nest框架通过**依赖注入（DI）**来实现**控制反转（IOC）**，当然，`IOC`还有很多其他的实现方式，如`ServiceLoader`等，你可以使用Nest的装饰器，如`@Injectable()`，并通过构造函数注入的方式，自动管理模块的依赖关系。
 
 ```js
-// 模拟数据库
+// 模拟数据库 （低层模块）
 class Repository {
   constructor() {
     this.data = [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }]
@@ -60,7 +62,7 @@ class Service {
   }
 }
 
-// 模拟路由处理逻辑
+// 模拟路由处理逻辑 （高层模块）
 class Controller {
   constructor(private service: Service) {}
 
@@ -74,6 +76,8 @@ class IocContainer {
   constructor() {
     this.services = {}
   }
+
+  // 将依赖关系进行了抽象，你可以是任何模块，任何依赖
   register(name, dependencies, implementation) {
     this.services[name] = {
       dependencies,
