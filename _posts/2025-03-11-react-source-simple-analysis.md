@@ -81,10 +81,6 @@ effectList = {
 
 会中断正在渲染的表格，开始执行`input`渲染
 
-
-
-
-
 1. 双缓存技术: 每个 Fiber 节点都有一个 `alternate` 属性，指向对应的 Fiber 节点在另一棵树中的镜像
    1. **current 树**：当前屏幕上显示的内容对应的 Fiber 树
    2. **workInProgress 树**：正在构建的新 Fiber 树

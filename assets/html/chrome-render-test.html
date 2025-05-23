@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrome渲染流程验证测试</title>
+  <style>
+    /* CSS预加载测试 - 这会触发预解析线程 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* 测试合成层创建 */
+    .composite-layer {
+      width: 200px;
+      height: 200px;
+      background: #ff6b6b;
+      transform: translateZ(0);
+      /* 强制创建合成层 */
+      border-radius: 10px;
+      margin: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .composite-layer:hover {
+      transform: translateZ(0) scale(1.1);
+      /* GPU加速动画 */
+    }
+
+    /* 测试复杂选择器匹配 */
+    .complex-selector div.nested span:nth-child(2n+1) {
+      color: #4ecdc4;
+      font-weight: bold;
+    }
+
+    /* 测试Flexbox布局算法 */
+    .flex-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .flex-item {
+      flex: 1 1 300px;
+      background: #45b7d1;
+      padding: 20px;
+      border-radius: 8px;
+      color: white;
+    }
+
+    /* 测试Grid布局算法 */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .grid-item {
+      background: #96ceb4;
+      padding: 20px;
+      border-radius: 8px;
+      color: white;
+    }
+
+    /* 测试滤镜效果 - 会创建合成层 */
+    .filter-layer {
+      width: 100%;
+      height: 100px;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzMzNzNkYyIvPgo8L3N2Zz4K');
+      filter: blur(2px) brightness(1.2);
+      will-change: filter;
+      /* 提示浏览器创建合成层 */
+      margin: 20px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Chrome渲染流程验证测试</h1>
+
+    <!-- HTML解析和DOM构建测试 -->
+    <section id="dom-test">
+      <h2>DOM构建测试</h2>
+      <div class="complex-selector">
+        <div class="nested">
+          <span>第一个span</span>
+          <span>第二个span (应该是蓝色粗体)</span>
+          <span>第三个span (应该是蓝色粗体)</span>
+          <span>第四个span</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 合成层测试 -->
+    <section id="composite-test">
+      <h2>合成层测试 (鼠标悬停查看GPU加速)</h2>
+      <div class="composite-layer">
+        <p style="padding: 20px; color: white; text-align: center;">
+          悬停我<br>GPU加速动画
+        </p>
+      </div>
+    </section>
+
+    <!-- 布局算法测试 -->
+    <section id="layout-test">
+      <h2>Flexbox布局算法测试</h2>
+      <div class="flex-container">
+        <div class="flex-item">Flex Item 1</div>
+        <div class="flex-item">Flex Item 2</div>
+        <div class="flex-item">Flex Item 3</div>
+      </div>
+
+      <h2>Grid布局算法测试</h2>
+      <div class="grid-container">
+        <div class="grid-item">Grid Item 1</div>
+        <div class="grid-item">Grid Item 2</div>
+        <div class="grid-item">Grid Item 3</div>
+        <div class="grid-item">Grid Item 4</div>
+      </div>
+    </section>
+
+    <!-- 滤镜合成层测试 -->
+    <section id="filter-test">
+      <h2>滤镜合成层测试</h2>
+      <div class="filter-layer"></div>
+    </section>
+
+    <!-- 动态DOM操作测试 -->
+    <section id="dynamic-test">
+      <h2>动态DOM操作测试</h2>
+      <button id="add-elements">添加元素 (观察重排重绘)</button>
+      <button id="modify-styles">修改样式 (观察样式重计算)</button>
+      <button id="trigger-layout">触发布局 (观察布局计算)</button>
+      <div id="dynamic-container"></div>
+    </section>
+
+    <!-- 资源加载测试 -->
+    <section id="resource-test">
+      <h2>资源加载测试</h2>
+      <button id="load-image">动态加载图片</button>
+      <button id="load-css">动态加载CSS</button>
+      <div id="resource-container"></div>
+    </section>
+  </div>
+
+  <script>
+    // 性能监控和渲染流程验证脚本
+    class ChromeRenderingProfiler {
+      constructor() {
+        this.setupPerformanceObserver();
+        this.setupMutationObserver();
+        this.logRenderingSteps();
+      }
+
+      // 监控性能指标
+      setupPerformanceObserver() {
+        if ('PerformanceObserver' in window) {
+          // 监控First Contentful Paint
+          const paintObserver = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+              console.log(`🎨 ${entry.name}: ${entry.startTime.toFixed(2)}ms`);
+            }
+          });
+          paintObserver.observe({
+            entryTypes: ['paint']
+          });
+
+          // 监控Layout Shift
+          const layoutObserver = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+              console.log(`📐 Layout Shift: ${entry.value.toFixed(4)}`);
+            }
+          });
+          layoutObserver.observe({
+            entryTypes: ['layout-shift']
+          });
+
+          // 监控Long Tasks
+          const longTaskObserver = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+              console.log(`⏱️ Long Task: ${entry.duration.toFixed(2)}ms`);
+            }
+          });
+          longTaskObserver.observe({
+            entryTypes: ['longtask']
+          });
+        }
+      }
+
+      // 监控DOM变化
+      setupMutationObserver() {
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            console.log(`🔄 DOM Mutation: ${mutation.type}`, mutation);
+          });
+        });
+
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeOldValue: true
+        });
+      }
+
+      // 记录渲染步骤
+      logRenderingSteps() {
+        console.log('🚀 Chrome渲染流程验证开始');
+        console.log('📊 可以通过以下方式验证渲染流程:');
+        console.log('1. 打开Chrome DevTools');
+        console.log('2. 转到Performance面板');
+        console.log('3. 点击Record按钮');
+        console.log('4. 刷新页面或执行下面的测试操作');
+        console.log('5. 停止录制查看渲染时间线');
+        console.log('');
+        console.log('🔍 验证要点:');
+        console.log('- Parse HTML: HTML解析阶段');
+        console.log('- Recalculate Style: 样式计算阶段');
+        console.log('- Layout: 布局计算阶段');
+        console.log('- Update Layer Tree: 分层阶段');
+        console.log('- Paint: 绘制阶段');
+        console.log('- Composite Layers: 合成阶段');
+      }
+
+      // 强制触发重排
+      forceReflow() {
+        const start = performance.now();
+        const element = document.getElementById('dynamic-container');
+        element.style.width = '100px';
+        const width = element.offsetWidth; // 强制重排
+        element.style.width = '200px';
+        const end = performance.now();
+        console.log(`🔄 强制重排耗时: ${(end - start).toFixed(2)}ms`);
+      }
+
+      // 强制触发重绘
+      forceRepaint() {
+        const start = performance.now();
+        const element = document.querySelector('.composite-layer');
+        element.style.backgroundColor = '#ff9999';
+        setTimeout(() => {
+          element.style.backgroundColor = '#ff6b6b';
+          const end = performance.now();
+          console.log(`🎨 强制重绘耗时: ${(end - start).toFixed(2)}ms`);
+        }, 100);
+      }
+
+      // 测试合成层
+      testCompositingLayer() {
+        console.log('🧪 测试合成层创建...');
+        const layer = document.querySelector('.composite-layer');
+        layer.style.transform = 'translateZ(0) rotateX(45deg)';
+        console.log('✅ 3D变换应该创建新的合成层');
+      }
+    }
+
+    // 初始化性能分析器
+    const profiler = new ChromeRenderingProfiler();
+
+    // 绑定测试按钮事件
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📄 DOMContentLoaded - DOM构建完成');
+
+      // 添加元素测试
+      document.getElementById('add-elements').addEventListener('click', () => {
+        console.log('➕ 开始添加元素测试...');
+        const container = document.getElementById('dynamic-container');
+        for (let i = 0; i < 100; i++) {
+          const div = document.createElement('div');
+          div.textContent = `动态元素 ${i + 1}`;
+          div.style.cssText = `
+                        padding: 10px;
+                        margin: 5px;
+                        background: hsl(${i * 3.6}, 70%, 60%);
+                        border-radius: 4px;
+                        display: inline-block;
+                    `;
+          container.appendChild(div);
+        }
+        console.log('✅ 元素添加完成，观察DOM构建和Layout计算');
+      });
+
+      // 修改样式测试
+      document.getElementById('modify-styles').addEventListener('click', () => {
+        console.log('🎨 开始样式修改测试...');
+        const elements = document.querySelectorAll('#dynamic-container > div');
+        elements.forEach((el, index) => {
+          el.style.transform = `rotate(${index * 10}deg) scale(${1 + index * 0.1})`;
+          el.style.filter = `hue-rotate(${index * 30}deg)`;
+        });
+        console.log('✅ 样式修改完成，观察Style Recalculation');
+      });
+
+      // 触发布局测试
+      document.getElementById('trigger-layout').addEventListener('click', () => {
+        console.log('📐 开始布局触发测试...');
+        profiler.forceReflow();
+        profiler.forceRepaint();
+        profiler.testCompositingLayer();
+      });
+
+      // 动态加载图片
+      document.getElementById('load-image').addEventListener('click', () => {
+        console.log('🖼️ 开始动态加载图片...');
+        const img = document.createElement('img');
+        img.src =
+          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzNzNkYyIvPgogIDx0ZXh0IHg9IjE1MCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqo5oCB5Yqg6L295Zu+54mHPC90ZXh0Pgo8L3N2Zz4K';
+        img.style.cssText = 'max-width: 100%; height: auto; margin: 10px 0;';
+        img.onload = () => console.log('✅ 图片加载完成，观察Image Decode和Paint过程');
+        document.getElementById('resource-container').appendChild(img);
+      });
+
+      // 动态加载CSS
+      document.getElementById('load-css').addEventListener('click', () => {
+        console.log('📄 开始动态加载CSS...');
+        const style = document.createElement('style');
+        style.textContent = `
+                    .dynamic-style {
+                        animation: rainbow 2s infinite;
+                        padding: 20px;
+                        margin: 10px 0;
+                        border-radius: 10px;
+                        text-align: center;
+                        color: white;
+                        font-weight: bold;
+                    }
+                    
+                    @keyframes rainbow {
+                        0% { background: #ff0000; }
+                        16.66% { background: #ff8000; }
+                        33.33% { background: #ffff00; }
+                        50% { background: #00ff00; }
+                        66.66% { background: #0080ff; }
+                        83.33% { background: #8000ff; }
+                        100% { background: #ff0000; }
+                    }
+                `;
+        document.head.appendChild(style);
+
+        const div = document.createElement('div');
+        div.className = 'dynamic-style';
+        div.textContent = '动态CSS动画 - 观察GPU合成层';
+        document.getElementById('resource-container').appendChild(div);
+        console.log('✅ CSS加载完成，观察Style Recalculation和Composite Layers');
+      });
+    });
+
+    // 页面加载完成
+    window.addEventListener('load', () => {
+      console.log('🏁 Window Load - 所有资源加载完成');
+      console.log('📈 完整渲染流程结束');
+
+      // 输出性能指标
+      if ('performance' in window) {
+        const navigation = performance.getEntriesByType('navigation')[0];
+        console.log('⏱️ 性能指标:');
+        console.log(`- DNS查询: ${navigation.domainLookupEnd - navigation.domainLookupStart}ms`);
+        console.log(`- TCP连接: ${navigation.connectEnd - navigation.connectStart}ms`);
+        console.log(`- HTTP请求: ${navigation.responseStart - navigation.requestStart}ms`);
+        console.log(`- HTML解析: ${navigation.domInteractive - navigation.responseEnd}ms`);
+        console.log(`- DOM构建: ${navigation.domContentLoadedEventEnd - navigation.domContent
