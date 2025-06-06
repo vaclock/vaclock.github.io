@@ -43,4 +43,13 @@ tags: React
 
 ### PurComponent
 
+## ErrorBoundary 和 Suspense
+
+`ErrorBoundary`: 用于展示渲染子组件过程中，发生了报错，想在页面展示兜底内容或者报错信息
+`Suspense`: 用于展示子组件依赖异步数据或者动态加载子组件代码的场景，在子组件未 ready 前，展示 loading 态
+
+**原理**
+
+这两个组件的实现都基于 `try...catch`, 用于捕获组件的 `throw`, `React.lazy` 返回的是一种特殊的对象，拥有独立的 `tag`, 在渲染时会单独处理，捕获到异常后会判断是 ``
+
 ## 组件库
