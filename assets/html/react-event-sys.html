@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React 事件委托测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-area {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        .parent {
+            background-color: #e3f2fd;
+            padding: 20px;
+            margin: 10px 0;
+            border: 2px solid #2196f3;
+            border-radius: 5px;
+        }
+        .child {
+            background-color: #fff3e0;
+            padding: 15px;
+            margin: 10px;
+            border: 2px solid #ff9800;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .native-test {
+            background-color: #f3e5f5;
+            padding: 15px;
+            margin: 10px;
+            border: 2px solid #9c27b0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .log {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .clear-btn {
+            background-color: #f44336;
+        }
+        .clear-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>React 事件委托与冒泡测试</h1>
+        
+        <div class="test-area">
+            <h2>测试说明</h2>
+            <p>点击不同的区域，观察事件的触发顺序和冒泡行为：</p>
+            <ul>
+                <li><strong>蓝色区域</strong>：Parent 组件</li>
+                <li><strong>橙色区域</strong>：Child 组件（会阻止冒泡）</li>
+                <li><strong>紫色区域</strong>：原生DOM事件测试</li>
+            </ul>
+        </div>
+
+        <div id="react-root"></div>
+
+        <div class="test-area">
+            <h3>原生DOM事件测试</h3>
+            <div id="native-parent" class="native-test">
+                原生 Parent (点击我)
+                <div id="native-child" class="native-test" style="background-color: #e8f5e8;">
+                    原生 Child - 会阻止冒泡 (点击我)
+                </div>
+            </div>
+        </div>
+
+        <div class="test-area">
+            <h3>事件日志</h3>
+            <button onclick="clearLog()">清除日志</button>
+            <button onclick="addSeparator()">添加分隔符</button>
+            <div id="log" class="log">点击上方的区域开始测试...\n</div>
+        </div>
+    </div>
+
+    <!-- React CDN -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+
+        function addSeparator() {
+            log('--- 分隔符 ---');
+        }
+
+        // React 组件
+        function Child() {
+            const handleClick = (e) => {
+                log('React Child: 事件触发');
+                log('React Child: 调用 e.stopPropagation()');
+                e.stopPropagation(); // 阻止React事件冒泡
+            };
+
+            return (
+                <div className="child" onClick={handleClick}>
+                    React Child - 会阻止冒泡 (点击我)
+                </div>
+            );
+        }
+
+        function Parent() {
+            const handleClick = (e) => {
+                log('React Parent: 事件触发');
+                log(`React Parent: 事件目标是 ${e.target.textContent.substring(0, 20)}...`);
+            };
+
+            return (
+                <div className="parent" onClick={handleClick}>
+                    React Parent (点击我)
+                    <Child />
+                    <div className="child" onClick={(e) => {
+                        log('React Child2: 事件触发 (不阻止冒泡)');
+                    }}>
+                        React Child2 - 不阻止冒泡 (点击我)
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            return (
+                <div>
+                    <div className="test-area">
+                        <h3>React 组件事件测试</h3>
+                        <Parent />
+                    </div>
+                </div>
+            );
+        }
+
+        // 渲染 React 应用
+        const root = ReactDOM.createRoot(document.getElementById('react-root'));
+        root.render(<App />);
+
+        // 原生DOM事件测试
+        document.getElementById('native-parent').addEventListener('click', function(e) {
+            log('原生 Parent: 事件触发');
+            log(`原生 Parent: 事件目标是 ${e.target.id || e.target.textContent.substring(0, 20)}`);
+        });
+
+        document.getElementById('native-child').addEventListener('click', function(e) {
+            log('原生 Child: 事件触发');
+            log('原生 Child: 调用 e.stopPropagation()');
+            e.stopPropagation(); // 阻止原生事件冒泡
+        });
+
+        // 添加一些额外的测试
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#react-root') || e.target.closest('#native-parent')) {
+                log(`Document: 捕获到点击事件，目标: ${e.target.tagName}`);
+            }
+        });
+
+        log('测试环境已准备就绪！');
+    </script>
+</body>
+</html>
